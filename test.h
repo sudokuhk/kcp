@@ -21,6 +21,7 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #endif
+#include <set>
 
 /* get system time */
 static inline void itimeofday(long *sec, long *usec)
@@ -106,6 +107,10 @@ public:
 	int size() const { return _size; }
 	IUINT32 ts() const { return _ts; }
 	void setts(IUINT32 ts) { _ts = ts; }
+    
+    bool operator<(const DelayPacket & rhs) {
+        return _ts < rhs._ts;
+    }
 
 protected:
 	unsigned char *_ptr;
@@ -195,9 +200,9 @@ public:
 		if (rttmax > rttmin) delay += rand() % (rttmax - rttmin);
 		pkt->setts(current + delay);
 		if (peer == 0) {
-			p12.push_back(pkt);
+			p12.insert(pkt);
 		}	else {
-			p21.push_back(pkt);
+			p21.insert(pkt);
 		}
 	}
 
@@ -236,7 +241,7 @@ protected:
 	int rttmin;
 	int rttmax;
 	int nmax;
-	typedef std::list<DelayPacket*> DelayTunnel;
+	typedef std::set<DelayPacket*> DelayTunnel;
 	DelayTunnel p12;
 	DelayTunnel p21;
 	Random r12;
@@ -246,5 +251,3 @@ protected:
 #endif
 
 #endif
-
-
